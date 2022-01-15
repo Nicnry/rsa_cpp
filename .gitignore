@@ -35,3 +35,13 @@
 */files
 ./CMakeLists.txt
 ./cmake-build-debug/*
+
+.DS_Store
+
+.idea/
+
+cmake-build-debug/
+
+files/
+
+CMakeLists.txt
