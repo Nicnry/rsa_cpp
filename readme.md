@@ -1,0 +1,2 @@
+# Laboratoire sur RSA
+Dans le cadre de ma formation à la HEIG-VD, j'ai eu l'occasion de découvrir le language c++ et de faire un travail pratique sur les notions de bases de la programmation. Afin d'effectuer une évaluation, un laboratoire sur les objets nous est demandé. Nous avons du implémenter une classe Uint et Sint qui ont pour but de stocker des nombres extrêmement grand dans des vecteur (C++). Afin de prouver le bon fonctionnement de nos objets, nous avons du implémenter un chiffrement (rsa) afin de voir si nos objets sont bien fonctionnels.
