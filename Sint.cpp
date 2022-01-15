@@ -18,6 +18,11 @@ Description    :		Cette classe est relativement similaire à Uint, mais elle
 
 Sint::Sint() = default;
 
+/**
+ * @brief On vérifie si le premier caractère est le signe '-' afin de définir
+ * notre attribut signe (0 = -) (1 = +)
+ * @param std::string nombre : valeur de notre Sint
+ */
 Sint::Sint(std::string nombre) {
 	//Verifier si premier caractère est '-'
 	if(nombre.at(0) == 45) {
@@ -41,7 +46,14 @@ Sint::Sint(int64_t nombre) {
 	this->nombre = Uint(nombre_string);
 }
 
-bool Sint::operator<(const Sint &rhs) const {
+
+Sint::operator Uint() const {
+	Uint nombre_uint = 0;
+	nombre_uint = this->nombre;
+	return nombre_uint;
+}
+
+bool Sint::operator<(const Sint& rhs) const {
 	return comp(*this, rhs) == -1;
 }
 
@@ -77,6 +89,8 @@ Sint& Sint::operator+=(const Sint& rhs) {
 			this->signe = !this->signe;
 		}
 	}
+	this->retirer_signe_neutralite();
+
 	return *this;
 }
 
@@ -93,6 +107,7 @@ Sint& Sint::operator-=(const Sint& rhs) {
 	} else {
 		this->nombre += rhs.nombre;
 	}
+	this->retirer_signe_neutralite();
 
 	return *this;
 }
@@ -100,18 +115,35 @@ Sint& Sint::operator-=(const Sint& rhs) {
 Sint& Sint::operator*=(const Sint& rhs) {
 	this->signe = !((this->signe + rhs.signe) % 2);
 	this->nombre *= rhs.nombre;
+	this->retirer_signe_neutralite();
 	return *this;
 }
 
 Sint& Sint::operator/=(const Sint& rhs) {
 	this->signe = !((this->signe + rhs.signe) % 2);
 	this->nombre /= rhs.nombre;
+	this->retirer_signe_neutralite();
 	return *this;
 }
 
 Sint& Sint::operator%=(const Sint& rhs) {
 	this->nombre %= rhs.nombre;
+	this->retirer_signe_neutralite();
 	return *this;
+}
+
+Sint& Sint::operator--() {
+	*this -= 1;
+	this->retirer_signe_neutralite();
+	return *this;
+}
+
+const Sint Sint::operator--(int) {
+	Sint temp = *this;
+	--*this;
+	this->retirer_signe_neutralite();
+	temp.retirer_signe_neutralite();
+	return temp;
 }
 
 std::ostream& operator<<(std::ostream& lhs, const Sint& rhs) {
@@ -167,4 +199,10 @@ int Sint::comp(const Sint& lhs, const Sint& rhs) const {
 		}
 	}
 	return 0;
+}
+
+void Sint::retirer_signe_neutralite(){
+	if(this->nombre == 0){
+		this->signe = true;
+	}
 }

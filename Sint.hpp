@@ -20,6 +20,9 @@ public:
 	Sint();
 	Sint(std::string nombre);
 	Sint(int64_t nombre);
+
+	explicit operator Uint() const;
+
 	bool operator<(const Sint& rhs) const;
 	bool operator>(const Sint& rhs) const;
 	bool operator<=(const Sint& rhs) const;
@@ -33,6 +36,9 @@ public:
 	Sint& operator/=(const Sint& rhs);
 	Sint& operator%=(const Sint& rhs);
 
+	Sint& operator--();
+	const Sint operator--(int);
+
 private:
 	Uint nombre;
 	bool signe; //(0 = -) (1 = +)
@@ -45,6 +51,7 @@ private:
 	friend Sint operator%(Sint lhs, const Sint& rhs);
 
 	int comp(const Sint& lhs, const Sint& rhs) const;
+	void retirer_signe_neutralite();
 
 };
 
