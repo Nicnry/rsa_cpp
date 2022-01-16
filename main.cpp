@@ -1,258 +1,174 @@
-/*
---------------------------------------------------------------------------------
-Nom du fichier :    	henry_labo31.cpp
-Auteur(s)      :    	Nicolas Henry
-Date creation  :    	11.01.2022
-Laboratoire n° :    	31
-Description    :
---------------------------------------------------------------------------------
-*/
-
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <limits>
-#include "Uint.hpp"
 #include "Sint.hpp"
+#include "Uint.hpp"
+#include <iostream>
+#include <string>
 #include <random>
+#include <functional>
 
 using namespace std;
-
-
 const uint32_t GRAINE = 34032;
 mt19937 mt_rand(GRAINE);
 uniform_int_distribution<int32_t> distribution(0, 9);
 
-// Gestion minimaliste des opérations erronées sur les fichiers
-class Erreur_fichier{
-	string msg;
-public:
-	Erreur_fichier(const string& message):msg(message){}
-	string quoi() {return msg;}
-};
+const Uint E = 65537;
 
+
+/**
+ *
+ * @brief La fonction d’exponentiation modulaire (b^e mod m), où b, e et m sont
+ * des entiers positifs. Pour implanter cette fonction efficacement, peut
+ * remarquer que si e est pair, sa valeur vaut (((b2) mod m)(e/2)), ce qui
+ * permet de diviser par 2 le nombre de  multiplications. Si b est impair, sa
+ * valeur vaut : (b * be−1 mod m). On en dérive un algorithme efficace donné
+ * dans l'énoncé, et est implanté dans une fonction de ce programme. Enfin, une
+ * fonction de verification valide si la fonction de l'exponentiation modulaire
+ * est le même résultat que (b^e mod m). Attention, le nom a changé dans ce
+ * laboratoire car le fichier fournit pour les tests utilise la fonction
+ * "mod_pow".
+ * @param base
+ * @param exposant
+ * @param modulo
+ * @return resultat
+ */
 Uint mod_pow(Uint base, Uint exposant, Uint modulo);
 
-// Indique si le fichier existe
-bool teste_existence(const string& nom_fichier);
+/**
+ * @brief La problématique est la factorisation des nombres en informatiques qui
+ * est extrêmement complexe, ici on "factorise" afin de savoir si un nombre est
+ * premier ou non.
+ * @param nombre
+ * @return Si le nombre est premier ou non (true = premier).
+ */
+bool test_rapide_primalite(Uint nombre);
 
-// Lance une exception si le fichier n'existe pas
-void verifie_existence(const string& nom_fichier);
+/**
+ * @brief Cette fonction retourne 2 éléments, le PGDC en return, ainsi
+ * que l'inverse par référence. L'inverse est le nombre qui permet de retrouver
+ * le même résultat de (nombre^x % modulo) et (nombre^y % modulo), dans ce cas,
+ * y est l'inverse de x et le résultat serait identique. Plus d'informations
+ * sur : https://fr.wikipedia.org/wiki/Algorithme_d%27Euclide_%C3%A9tendu.
+ * @param nombre1
+ * @param nombre2
+ * @param inverse : retourne l'inverse par référence
+ * @return PGDC de 2 nombres.
+ */
+Uint euclide_etendue(Sint nombre1, Sint nombre2, Sint& inverse);
 
-void lire_cle(const string& nom_fichier_cle, Uint& m, Uint& e);
 
-// Lire les données à crypter ou à décrypter
-string lire_donnees(const string& nom_in);
+/**
+ * @brief Cette fonction retourne 2 éléments, le PGDC en return, ainsi
+ * que l'inverse par référence. L'inverse est le nombre qui permet de retrouver
+ * le même résultat de (nombre^x % modulo) et (nombre^y % modulo), dans ce cas,
+ * y est l'inverse de x et le résultat serait identique. Plus d'informations
+ * sur : https://fr.wikipedia.org/wiki/Algorithme_d%27Euclide_%C3%A9tendu.
+ * @param nombre
+ * @param nombre2
+ * @param inverse : retourne l'inverse par référence
+ * @return PGDC de 2 nombres.
+ */
+Uint generateur_aleatoire(int nombre);
 
-// Calcule le nombre de caractères que n peut contenir au maximum
-size_t determine_taille_bloc(const Uint& n);
+int main() {
+	Sint inverse = 0; //L'inverse peut être négatif durant le calcul
+	// Stockage du calcul (p-1)*(q-1) pour éviter de le réécrire plusieurs fois.
+	bool e_correct;
+	Uint n, clef_prive, verification_e, p, q;     // Stock la clef privé
+	int taille_clef;
+	cout << "Introduire la taille des clef privée à générer: ";
+	cin >> taille_clef;
+	cout << "1" << endl;
+	do {
+		p = generateur_aleatoire(taille_clef); // Génération d'un nombre random
+	} while (!test_rapide_primalite(p)); // Vérifie que P est prime
+	cout << "2" << endl;
+	do {
+		q = generateur_aleatoire(taille_clef); // Vérification generateur_aleatoire
+	} while (!test_rapide_primalite(q)); // Vérification exponentiation modulaire, prime
+	cout << "3" << endl;
+	n = p * q;
+	verification_e = (p - 1) * (q - 1);
 
-void   crypte(const string& nom_cle, const string&nom_in, const string& nom_out);
-void decrypte(const string& nom_cle, const string&nom_in, const string& nom_out);
-
-int main(int argc, char* argv[])
-{
-	//Max test value 9223372036854775807
-	{
-		Uint a = 75;
-		Uint b = 75;
-		a %= b;
-		cout << 9223372036854775807 << endl;
+	e_correct = euclide_etendue((Sint)verification_e, (Sint)E,inverse) == 1 && E < verification_e;
+	if(!e_correct){
+		cout << "Erreur avec e " << endl;
 	}
+	clef_prive = (Uint)inverse;
+	cout << "Pair de clef pour crypter : " << n << " " << E << endl;
+	cout << "Pair de clef pour decrypter : " << n << " " << clef_prive<<endl;
 
-	try
-	{ // Vérifier que la commande dispose des bons arguments
-		string msg = "Utilisation: "s + argv[0] + " [-c|-d] fichier_de_cle fichier_entree fichier_sortie\n";
-		if (argc != 5)
-			throw Erreur_fichier(msg);
-
-		string option = argv[1], f_cle = argv[2], f_in = argv[3], f_out = argv[4];
-
-		if (option != "-c" and option != "-d")
-			throw Erreur_fichier(msg);
-
-		verifie_existence(f_cle);
-		verifie_existence(f_in);
-		if (teste_existence(f_out) )
-		{
-			cout << "Ecraser le fichier: " << f_out << " ?\n";
-			char c;
-			cin >> c;
-			if (not(c == 'y' or c == 'Y' or c == 'o' or c == 'O'))
-			{
-				cout << f_out << " non modifie\n";
-				return 0;
-			}
+}
+Uint generateur_aleatoire(int nombre) {
+	string random_string;
+	Uint random_sint;
+	int random_digit;
+	for (size_t i = 0; i < nombre; i++) {
+		random_digit = distribution(mt_rand);
+		cout << "random : " << random_digit << endl;
+		//On supprime
+		if (i == 0) {
+			do {
+				random_digit = distribution(mt_rand);
+			} while (random_digit == 0);
 		}
-		if (option == "-c")
-			crypte(f_cle, f_in, f_out);
-		else
-			decrypte(f_cle, f_in, f_out);
-
-		cout << "Operation reussie\n";
+		random_string += to_string(random_digit);
 	}
-
-	catch(invalid_argument& e) // Lecture d'un Uint impossible
-	{ cerr << e.what() << endl << "Contenu d'un fichier errone\n"; return -1;}
-
-	catch(Erreur_fichier& e)
-	{ cerr << e.quoi(); return -1;}
+	random_sint = random_string;
+	return random_sint;
 }
 
-const int MAX_CHAR = numeric_limits<unsigned char>::max();
-
-bool teste_existence(const string& nom_fichier)
-{
-	fstream fichier;
-	fichier.open(nom_fichier, ios::in);
-	if (fichier)
-	{
-		fichier.close();
+bool test_rapide_primalite(Uint nombre) {
+	//Utilisation d'une variable, car souvent répété dans la fonction.
+	Uint nombre_moins_1 = nombre - 1;
+	//1 et 0 ne sont pas premier,
+	if (nombre < 2) {
+		return false;
+	}
+	/**
+	 * 2 est le premier nombre premier et empêche tous les nombres paires d'être
+	 * premier. Tester si l'utilisateur rentre 3 (car generateur_aleatoire
+	 * retournera 2 et ça ferra modulo 2 donc boucle infinie plus tard dans la
+	 * fonction). */
+	if (nombre == 2 || nombre == 3) {
 		return true;
 	}
-	return false;
-}
-
-void verifie_existence(const string& nom_fichier)
-{
-	if (!teste_existence(nom_fichier))
-		throw Erreur_fichier(nom_fichier + ": fichier inexistant\n");
-}
-
-void lire_cle(const string& nom_fichier_cle, Uint& m, Uint& e)
-{
-	fstream fichier;
-	fichier.open(nom_fichier_cle, ios::in);
-
-	fichier >> m >> e;
-	if (!fichier.good())
-	{
-		fichier.close();
-		throw Erreur_fichier(nom_fichier_cle + ": fichier de cle incorrect\n");
-	}
-	fichier.close();
-}
-
-string lire_donnees(const string& nom_in)
-{
-	string in;
-	fstream fichier;
-	fichier.open(nom_in, ios::in|ios::binary);
-	char c;
-	while (fichier.get(c))
-		in.push_back(c);
-	fichier.close();
-	return in;
-}
-
-size_t determine_taille_bloc(const Uint& n)
-{
-	Uint max_v = MAX_CHAR;
-	size_t taille_bloc = 0;
-	while (max_v <= n)
-	{ taille_bloc++;
-		max_v *= MAX_CHAR;
-	}
-	return taille_bloc;
-}
-
-void crypte(const string& nom_cle, const string& nom_in, const string& nom_out)
-{
-	Uint n, e; // Clé publique
-	lire_cle(nom_cle, n, e);
-	size_t taille_bloc = determine_taille_bloc(n);
-	if (taille_bloc < 1)
-		throw Erreur_fichier("Cle trop petite; cryptage pas possible"s);
-
-	string in = lire_donnees(nom_in);
-	if (n < in.size())
-		throw Erreur_fichier("Cle trop petite pour crypter entierement "s + nom_in);
-
-	fstream fichier;
-	fichier.open(nom_out, ios::out);
-	if (!fichier)
-		throw Erreur_fichier(nom_out + ": pas ouvrable en ecriture\n");
-
-	// Écriture de la taille du fichier d'origine
-	fichier << mod_pow(in.length(), e, n) << endl;
-
-	// Bourrage des données d'origine pour arriver à une taille multiple d'un bloc
-	while (in.length() % taille_bloc != 0)
-		in.push_back(char(rand()%MAX_CHAR));
-
-	cout << "Cryptage:\n";
-	for (size_t i = 0; i < in.length(); i += taille_bloc)
-	{ Uint m = 0;
-		// Transformation d'un bloc en un Uint
-		for (size_t j = 0; j < taille_bloc; j++)
-		{ m *= MAX_CHAR;
-			m += (unsigned char) in.at(i + j);
+	Uint nombre_aleatoire;
+	//Tester 10 fois pour s'assurer de la primalité
+	for (int i = 0; i <= 10; i++) {
+		//Generation d'un nombre aléatoire, on vérifie avec % si le nombre dépasse nombre-1
+		do {
+			nombre_aleatoire = (uint32_t)distribution(mt_rand) % nombre_moins_1;
+		} while (nombre_aleatoire < 2);
+		/**
+		 * Si l'exponentiation modulaire retourne autre chose que 1, c'est que le
+		 * nombre n'est pas premier (le PGDC d'un nombre premier ne peut être que
+		 * lui même et 1, donc si on trouve autre chose que 1...)
+		 */
+		if (mod_pow(nombre_aleatoire, nombre_moins_1, nombre) != 1) {
+			return false;
 		}
-		if (! (fichier << mod_pow(m, e, n) << endl) )
-		{
-			fichier.close();
-			throw Erreur_fichier(nom_out + ": erreur en ecriture\n");
+		/**
+		 * les noms de variables q et u viennent de la formule mathématique fournie
+		 * ici : https://fr.wikipedia.org/wiki/Algorithme_d%27Euclide_%C3%A9tendu,
+		 * mais pour résumer, ce sont des variables temporaires qu'on doit utiliser
+		 * en informatique et qui ne sont pas expliquée mathématiquement, c'est une
+		 * contrainte du language C++ qui ne permet pas d'affecter plusieurs
+		 * variables en une seule fois.
+		 */
+		Uint q = 1;
+		Uint u = nombre_moins_1;
+		//Tant que u n'est pas pair (divisible par 2) il est candidat.
+		while ((u % 2) == 0 && q == 1) {
+			u /= 2;
+			q = mod_pow(nombre_aleatoire, u, nombre);
+			//Si q n'est pas premier et (nombre - 1), c'est qu'il n'est pas premier...
+			if (q != 1 && q != nombre_moins_1) {
+				return false;
+			}
 		}
-		cout << "\r" << 100 * i / in.length() << "%" << flush;
 	}
-	cout << "\r100%  \n";
-	fichier.close();
-
+	return true;
 }
 
-void decrypte(const string& nom_cle, const string& nom_in, const string& nom_out)
-{
-	Uint n, d; // Clé privée
-	lire_cle(nom_cle, n, d);
-	size_t taille_bloc = determine_taille_bloc(n);
-
-	Uint c, m; // Bloc crypté et décrypté
-	fstream fichier;
-	fichier.open(nom_in, ios::in);
-
-	fichier >> c; // Le premier bloc donne la taille du fichier à reconstituer
-	m = mod_pow(c, d, n);
-	size_t taille_fichier = size_t(uint64_t(m));
-
-	string bloc(taille_bloc, '\0'),
-		out; // Données décryptées
-
-	cout << "Decryptage:\n";
-	for (size_t i = 0; i < taille_fichier; i += taille_bloc)
-	{
-		if (!(fichier >> c) )
-		{
-			fichier.close();
-			throw Erreur_fichier(nom_in + ": corrompu ou mauvaise cle\n");
-		}
-		m = mod_pow(c, d, n);
-		for (size_t j = 0; j < taille_bloc; ++j)
-		{
-			bloc.at(j) = char(uint64_t(m % MAX_CHAR));
-			m /= MAX_CHAR;
-		}
-		reverse(bloc.begin(), bloc.end());
-		out += bloc;
-		cout << "\r" << 100 * i / taille_fichier << "%" << flush;
-	}
-	cout << "\r100%  \n";
-	fichier.close();
-
-	fichier.open(nom_out, ios::out|ios::binary);
-	if (!fichier)
-		throw Erreur_fichier(nom_out + ": pas ouvrable en ecriture\n");
-
-	// Écriture du fichier décrypté
-	for (size_t i = 0; i < taille_fichier; ++i)
-		fichier.put(out.at(i));
-	if (!fichier.good())
-	{
-		fichier.close();
-		throw Erreur_fichier(nom_out + ": erreur en ecriture\n");
-	}
-	fichier.close();
-
-}
 Uint mod_pow(Uint base, Uint exposant, Uint modulo) {
 	Uint resultat = 1;
 	while (exposant > 0) {
@@ -264,6 +180,29 @@ Uint mod_pow(Uint base, Uint exposant, Uint modulo) {
 			exposant--;
 		}
 	}
-
 	return resultat;
+}
+
+Uint euclide_etendue(Sint nombre1, Sint nombre2, Sint& inverse) {
+	Sint pgdc = nombre1;
+	Sint pgdc_prime = nombre2;
+	inverse = 0;
+	Sint inverse_prime = 1;
+	while (pgdc_prime != 0) {
+		// partie entière de pgdc et pgdc' car int, q est le nom fournit dans l'algo.
+		Sint q = pgdc / pgdc_prime;
+		Sint pgdc_temp = pgdc;
+		Sint inverse_temp = inverse;
+		pgdc = pgdc_prime;
+		inverse = inverse_prime;
+		pgdc_prime = pgdc_temp - q * pgdc_prime;
+		inverse_prime = inverse_temp - q * inverse_prime;
+	}
+	// /!\ inverse peut être négatif, c'est pourquoi les int sont utilisé dans cette fonction et non des unsigned.
+	// if (inverse < 0)
+	// {
+	//     inverse = inverse + nombre1;
+	//     cout << "kekw" << endl;
+	// }
+	return (Uint)pgdc;
 }

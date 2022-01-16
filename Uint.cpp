@@ -21,6 +21,19 @@ Description    :		Classe qui permet de gérer des unsigned int de taille
 
 Uint::Uint() = default;
 
+Uint::operator Sint() const {
+	//Conversion Uint -> Sint
+	Sint nombre_sint = 0;
+	std::string string_nombre;
+	for (size_t i = this->nombre.size(); i > 0; i--)
+	{
+		string_nombre += std::to_string(this->nombre.at(i-1));
+	}
+	nombre_sint=string_nombre;
+	return nombre_sint;
+
+}
+
 /**
  * @param std::string nombre : valeur de notre Uint
  */

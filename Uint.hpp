@@ -17,6 +17,8 @@ Description    :		Header du fichier Uint.cpp. Ce header implémente la
 #include <iostream>
 #include <cmath>
 
+class Sint;
+
 class Uint {
 
 public:
@@ -24,6 +26,7 @@ public:
 	Uint(std::string nombre);
 	Uint(uint64_t nombre);
 	explicit operator uint64_t() const;
+	explicit operator Sint() const;
 	bool operator<(const Uint& rhs) const;
 	bool operator>(const Uint& rhs) const;
 	bool operator<=(const Uint& rhs) const;
@@ -55,7 +58,7 @@ private:
 	friend Uint& operator*(Uint lhs, const Uint& rhs);
 	friend Uint operator/(Uint lhs, const Uint& rhs);
 	friend Uint operator%(Uint lhs, const Uint& rhs);
-	friend class Sint;
+	//friend class Sint;
 
 	int comp(const Uint& a, const Uint& b) const;
 	void fit();
