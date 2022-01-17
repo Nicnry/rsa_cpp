@@ -184,18 +184,10 @@ private:
 	/**
 	 * @brief Appel de la surcharge de l'opérateur *=
 	 * @param Uint lhs : Valeur de gauche
-	 * @param size_t& rhs : Valeur de droite
+	 * @param Uint& rhs : Valeur de droite
 	 * @return Uint : lhs
 	 */
-	friend Uint operator*(Uint lhs, const size_t& rhs);
-
-	/**
-	 * @brief Appel de la surcharge de l'opérateur *=
-	 * @param Uint lhs : Valeur de gauche
-	 * @param Uint& rhs : Valeur de droite
-	 * @return Uint& : lhs
-	 */
-	friend Uint& operator*(Uint lhs, const Uint& rhs);
+	friend Uint operator*(Uint lhs, const Uint& rhs);
 
 	/**
 	 * @brief Appel de la surcharge de l'opérateur /=

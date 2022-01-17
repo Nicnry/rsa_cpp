@@ -237,13 +237,8 @@ Uint operator-(Uint lhs, const size_t& rhs) {
 	return lhs -= temp;
 }
 
-Uint operator*(Uint lhs, const size_t& rhs) {
+Uint operator*(Uint lhs, const Uint& rhs) {
 	return lhs *= rhs;
-}
-
-Uint& operator*(Uint lhs, const Uint& rhs) {
-	const Uint& temp = rhs;
-	return lhs *= temp;
 }
 
 Uint operator/(Uint lhs, const Uint& rhs) {
