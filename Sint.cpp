@@ -32,13 +32,7 @@ Sint::Sint(std::string nombre) {
 Sint::Sint(int64_t nombre) {
 	//Simple copie
 	std::string nombre_string = std::to_string(nombre);
-	if(nombre_string.at(0) == 45) {
-		this->signe = false;
-		nombre_string.erase(nombre_string.begin());
-	} else {
-		this->signe = true;
-	}
-	this->nombre = Uint(nombre_string);
+	*this = Sint(nombre_string);
 }
 
 
@@ -173,33 +167,30 @@ Sint operator%(Sint lhs, const Sint& rhs) {
 }
 
 int Sint::comp(const Sint& lhs, const Sint& rhs) const {
+	if(lhs.signe == rhs.signe && lhs.nombre == rhs.nombre) {
+		return 0;
+	}
+
 	if (lhs.signe < rhs.signe) {
 		return -1;
-	} else if (lhs.signe > rhs.signe) {
-		return 1;
 	}
-	if (lhs.signe == rhs.signe) {
-		if (lhs.signe == 0) {
-			if (this->nombre > rhs.nombre) {
-				return 1;
-			}
-			if (this->nombre < rhs.nombre) {
-				return -1;
-			}
-		} else {
-			if (this->nombre < rhs.nombre) {
-				return -1;
-			}
-			if (this->nombre > rhs.nombre) {
-				return 1;
-			}
+
+	if (!lhs.signe) {
+		if (lhs.nombre > rhs.nombre) {
+			return -1;
+		}
+	} else {
+		if (lhs.nombre < rhs.nombre) {
+			return -1;
 		}
 	}
-	return 0;
+
+	return 1;
 }
 
 void Sint::retirer_signe_neutralite(){
-	if(this->nombre == 0){
+	//On peut mettre un ! mais je préfère m'assurer que c'est la valeur 0
+	if(this->nombre == 0) {
 		this->signe = true;
 	}
 }

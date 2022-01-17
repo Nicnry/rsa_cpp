@@ -1,3 +1,19 @@
+/*
+-----------------------------------------------------------------------------------
+Nom du fichier :    	henry_labo31.cpp
+Auteur(s)      :    	Nicolas Henry
+Date creation  :    	11.01.2022
+Laboratoire n° :    	31
+Description    :		Ce laboratoire reprend le laboratoire 16 fait plus tôt dans
+ 							l'année. Il a pour but de demander à l'utilisateur de
+ 							sélectionner une taille de clef (pour p et q) et ainsi de
+ 							générer des clefs pour chiffrer et déchiffrer un texte (
+ 							voir rsa.cpp). Pour plus d'informations sur les fonctions
+ 							dans ce laboratoire, voir le laboratoire 16 (
+ 							https://github.com/Nicnry/RSA_cpp_basique/blob/main/main.cpp).
+-----------------------------------------------------------------------------------
+*/
+
 #include "Sint.hpp"
 #include "Uint.hpp"
 #include <iostream>
@@ -5,11 +21,17 @@
 #include <random>
 
 using namespace std;
-const uint32_t GRAINE = 18232;
+/**
+ * La graine va servir à générer un nombre aléatoire. Il est déclarer hors du
+ * main afin d'être accessible dans toutes les fonctions. C'est un subterfuge
+ * pour ce labo, il est fortement décommandé de faire ceci pour de la vrai
+ * cryptographie. le nombre choisi pour la graine est aléatoire, d'autres
+ * chiffres iraient aussi.
+ */
+const uint32_t GRAINE = 27387;
+const Uint E = 17;
 mt19937 mt_rand(GRAINE);
 uniform_int_distribution<int32_t> distribution(0, 9);
-
-const Uint E = 17;
 
 /**
  * @brief La fonction d’exponentiation modulaire (b^e mod m), où b, e et m sont
@@ -22,10 +44,10 @@ const Uint E = 17;
  * est le même résultat que (b^e mod m). Attention, le nom a changé dans ce
  * laboratoire car le fichier fournit pour les tests utilise la fonction
  * "mod_pow".
- * @param base
- * @param exposant
- * @param modulo
- * @return resultat
+ * @param Uint base : b
+ * @param Uint exposant : e
+ * @param Uint& modulo : m
+ * @return Uint resultat
  */
 Uint mod_pow(Uint base, Uint exposant, const Uint& modulo);
 
@@ -34,7 +56,7 @@ Uint mod_pow(Uint base, Uint exposant, const Uint& modulo);
  * est extrêmement complexe, ici on "factorise" afin de savoir si un nombre est
  * premier ou non.
  * @param Uint& nombre : nombre à tester si il est premier ou non.
- * @return Si le nombre est premier ou non (true = premier).
+ * @return bool : Si le nombre est premier ou non (true = premier).
  */
 bool test_rapide_primalite(const Uint& nombre);
 
@@ -44,8 +66,8 @@ bool test_rapide_primalite(const Uint& nombre);
  * le même résultat de (nombre^x % modulo) et (nombre^y % modulo), dans ce cas,
  * y est l'inverse de x et le résultat serait identique. Plus d'informations
  * sur : https://fr.wikipedia.org/wiki/Algorithme_d%27Euclide_%C3%A9tendu.
- * @param Sint& nombre1 :
- * @param Sint nombre2 :
+ * @param Sint& nombre1 : pgdc
+ * @param Sint nombre2 : pgdc_prime
  * @param Sint& inverse : retourne l'inverse par référence
  * @return Uint : PGDC de 2 nombres.
  */
@@ -53,21 +75,19 @@ Uint euclide_etendue(const Sint& nombre1, Sint nombre2, Sint& inverse);
 
 
 /**
- * @brief Générateur de nombre (Uint) aléatoire
+ * @brief Générateur de nombre (Uint) aléatoire avec une vérification au cas ou
+ * le générateur sort un 0 pour le premier nombre.
  * @param size_t nombre : Taille souhaitée par l'utilisateur
  * @return Uint : Un nombre aléatoire de taille choisie par l'utilisateur
  */
 Uint generateur_aleatoire(size_t nombre);
 
 int main() {
-	Uint n, clef_prive, phi_euler, p, q;
 	int taille_de_clef;
-	cout << "Veuillez choisir une taille de clef : ";
+	cout << "Veuillez choisir une taille de clef  : ";
 	bool saisie_fausse;
-
 	do {
 		cin >> taille_de_clef;
-
 		if (cin.fail() || taille_de_clef <= 0) {
 			saisie_fausse = true;
 			cin.clear(); //Reset des bits d'erreurs
@@ -78,17 +98,47 @@ int main() {
 		cin.ignore(numeric_limits<streamsize>::max(), '\n'); //vide le buffer.
 	} while(saisie_fausse);
 
+	/**
+	 * p et q sont des nombres premiers généré de manière aléatoire dont la taille
+	 * de la clé est choisie par l'utilisateur. Dans ce programme, ils sont
+	 * nommés de cette manière car cela reprend le nommage du
+	 * chiffrement RSA. la variable e fait partie de la clé publique mais c'est
+	 * une constante à 17 (demandé par l'enseignant).
+	 * On vérifie si p et q sont différents, ainsi que s'ils sont premier.
+	 */
+	Uint p, q;
 	do {
 		p = generateur_aleatoire(size_t(taille_de_clef));
 	} while (!test_rapide_primalite(p)); //p doit être premier
 
 	do {
 		q = generateur_aleatoire(size_t(taille_de_clef));
-	} while (!test_rapide_primalite(q)); //q doit être premier
+	} while (!test_rapide_primalite(q) && q != p); //q doit être premier
 
+	/**
+	 * d est l’inverse de e modulo phi_euler avec l’algorithme d’Euclide étendu.
+	 * On l'instancie à 0 vu qu'il sera passé par référence et que (dans mon
+	 * environnement en tout cas) une variable qui n'a pas une valeur assignée
+	 * lors de la déclaration peut avoir n'importe quelle valeur, c'est important.
+	 * (Evidemment on sait ce que va faire la fonction, mais on ne le sait pas
+	 * toujours.
+	 */
 	Sint d = 0;
-	n = p * q;
-	phi_euler = (p - 1) * (q - 1);
+
+	/**
+	 * n est la 2ème partie de la clé publique (avec e) calculé par p * q qui
+	 * doivent rester secret (voir
+	 * https://fr.wikipedia.org/wiki/Chiffrement_RSA#Cr%C3%A9ation_des_cl%C3%A9s
+	 * point 2).
+	 */
+	Uint n = p * q;
+
+	/**
+	 * (p - 1) * (q - 1) = phi, dans le cadre de RSA, on utilise une notion
+	 * découverte par Euler voir
+	 * https://fr.wikipedia.org/wiki/Indicatrice_d%27Euler.
+	 */
+	Uint phi_euler = (p - 1) * (q - 1);
 	if (
 		!(
 			euclide_etendue((Sint)phi_euler, (Sint)E, d) == 1
@@ -101,22 +151,18 @@ int main() {
 	return 0;
 }
 
-Uint generateur_aleatoire(size_t nombre) {
-	string random_string; //Créer un string car pas de setter de l'attribut nombre.
-	Uint random_sint;
-	int random_digit;
-	for (size_t i = 0; i < nombre; i++) {
-		random_digit = distribution(mt_rand);
-		//Gérer le cas si le nombre commence par un 0
-		if (!random_digit && !i) {
-			do {
-				random_digit = distribution(mt_rand);
-			} while (!random_digit);
+Uint mod_pow(Uint base, Uint exposant, const Uint& modulo) {
+	Uint resultat = 1;
+	while (exposant > 0) {
+		if ((exposant % 2) == 0) {
+			base = base * base % modulo;
+			exposant /= 2;
+		} else {
+			resultat = resultat * base % modulo;
+			exposant--;
 		}
-		random_string += to_string(random_digit);
 	}
-	random_sint = random_string;
-	return random_sint;
+	return resultat;
 }
 
 bool test_rapide_primalite(const Uint& nombre) {
@@ -131,7 +177,8 @@ bool test_rapide_primalite(const Uint& nombre) {
 	 * 2 est le premier nombre premier et empêche tous les nombres paires d'être
 	 * premier. Tester si l'utilisateur rentre 3 (car generateur_aleatoire
 	 * retournera 2 et ça ferra modulo 2 donc boucle infinie plus tard dans la
-	 * fonction). */
+	 * fonction).
+	 */
 	if (nombre == 2 || nombre == 3) {
 		return true;
 	}
@@ -140,7 +187,7 @@ bool test_rapide_primalite(const Uint& nombre) {
 	for (int i = 0; i <= NOMBRE_DE_TOURS; i++) {
 		/**
 		 * Generation d'un nombre aléatoire, on vérifie avec % si le nombre
-		 * dépasse nombre-1
+		 * dépasse nombre - 1.
 		 */
 		do {
 			nombre_aleatoire = (uint32_t)distribution(mt_rand) % nombre_moins_1;
@@ -148,7 +195,7 @@ bool test_rapide_primalite(const Uint& nombre) {
 		/**
 		 * Si l'exponentiation modulaire retourne autre chose que 1, c'est que le
 		 * nombre n'est pas premier (le PGDC d'un nombre premier ne peut être que
-		 * lui même et 1, donc si on trouve autre chose que 1...)
+		 * lui même et 1, donc si on trouve autre chose que 1...).
 		 */
 		if (mod_pow(nombre_aleatoire, nombre_moins_1,
 						nombre) != 1) {
@@ -177,20 +224,6 @@ bool test_rapide_primalite(const Uint& nombre) {
 	return true;
 }
 
-Uint mod_pow(Uint base, Uint exposant, const Uint& modulo) {
-	Uint resultat = 1;
-	while (exposant > 0) {
-		if ((exposant % 2) == 0) {
-			base = base * base % modulo;
-			exposant /= 2;
-		} else {
-			resultat = resultat * base % modulo;
-			exposant--;
-		}
-	}
-	return resultat;
-}
-
 Uint euclide_etendue(const Sint& nombre1, Sint nombre2, Sint& inverse) {
 	Sint pgdc = nombre1;
 	Sint pgdc_prime = nombre2;
@@ -210,4 +243,20 @@ Uint euclide_etendue(const Sint& nombre1, Sint nombre2, Sint& inverse) {
 		inverse = inverse + nombre1;
 	}
 	return (Uint)pgdc;
+}
+
+Uint generateur_aleatoire(size_t nombre) {
+	string nombre_alea_txt; //Créer un string car pas de setter de l'attribut nombre.
+	int nombre_unique_alea;
+	for (size_t i = 0; i < nombre; i++) {
+		nombre_unique_alea = distribution(mt_rand);
+		//Gérer le cas si le nombre commence par un 0
+		if (!nombre_unique_alea && !i) {
+			do {
+				nombre_unique_alea = distribution(mt_rand);
+			} while (!nombre_unique_alea);
+		}
+		nombre_alea_txt += to_string(nombre_unique_alea);
+	}
+	return Uint(nombre_alea_txt);
 }

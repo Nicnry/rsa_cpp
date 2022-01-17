@@ -30,7 +30,7 @@ public:
 	Sint(std::string nombre);
 
 	/**
-	 * @brief Ce constructeur va appeler le constructeur par string
+	 * @brief Ce constructeur va appeler le constructeur par string.
 	 * @param int64_t nombre : valeur de notre Uint
 	 */
 	Sint(int64_t nombre);
@@ -108,7 +108,7 @@ public:
 	Sint& operator%=(const Sint& rhs);
 
 	/**
-	 * @brief opérateur -- pré-fixé (exemple : --i) qui appelle l'opérateur -=
+	 * @brief opérateur -- pré-fixé (exemple : --i) qui appelle l'opérateur -=.
 	 * @return Sint& : *this
 	 */
 	Sint& operator--();
@@ -132,7 +132,7 @@ private:
 	friend std::ostream& operator<<(std::ostream& lhs, const Sint& rhs);
 
 	/**
-	 * @brief Appel de la surcharge de l'opérateur +=
+	 * @brief Appel de la surcharge de l'opérateur +=.
 	 * @param Sint lhs : Valeur de gauche
 	 * @param Sint& rhs : Valeur de droite
 	 * @return Sint : lhs
@@ -140,7 +140,7 @@ private:
 	friend Sint operator+(Sint lhs,const Sint& rhs);
 
 	/**
-	 * @brief Appel de la surcharge de l'opérateur -=
+	 * @brief Appel de la surcharge de l'opérateur -=.
 	 * @param Sint lhs : Valeur de gauche
 	 * @param Sint& rhs : Valeur de droite
 	 * @return Sint : lhs
@@ -148,7 +148,7 @@ private:
 	friend Sint operator-(Sint lhs, const Sint& rhs);
 
 	/**
-	 * @brief Appel de la surcharge de l'opérateur *=
+	 * @brief Appel de la surcharge de l'opérateur *=.
 	 * @param Sint lhs : Valeur de gauche
 	 * @param Sint& rhs : Valeur de droite
 	 * @return Sint : lhs
@@ -156,7 +156,7 @@ private:
 	friend Sint& operator*(Sint& lhs, const Sint& rhs);
 
 	/**
-	 * @brief Appel de la surcharge de l'opérateur /=
+	 * @brief Appel de la surcharge de l'opérateur /=.
 	 * @param Sint lhs : Valeur de gauche
 	 * @param Sint& rhs : Valeur de droite
 	 * @return Sint : lhs
@@ -164,7 +164,7 @@ private:
 	friend Sint operator/(Sint lhs, const Sint& rhs);
 
 	/**
-	 * @brief Appel de la surcharge de l'opérateur %=
+	 * @brief Appel de la surcharge de l'opérateur %=.
 	 * @param Sint lhs : Valeur de gauche
 	 * @param Sint& rhs : Valeur de droite
 	 * @return Sint : lhs
@@ -181,7 +181,7 @@ private:
 	int comp(const Sint& lhs, const Sint& rhs) const;
 
 	/**
-	 * @brief Vu le le nombre 0 n'est pas signé, si le vecteur contient 0 il faut
+	 * @brief Vu que le nombre 0 n'est pas signé, si le vecteur contient 0 il faut
 	 * lui retirer le signe si il était négatif avant.
 	 * @return void
 	 */

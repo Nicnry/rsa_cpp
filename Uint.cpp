@@ -263,6 +263,10 @@ int Uint::comp(const Uint& a, const Uint& b) const {
 			if(a.nombre.at(i - 1) < b.nombre.at(i - 1)) {
 				return -1;
 			}
+			/**
+			 * Ce if sert uniquement à "break" si un des 2 nombres sont différents
+			 * et donc éviter de continuer la boucle inutilement.
+			 */
 			if(a.nombre.at(i - 1) > b.nombre.at(i - 1)) {
 				return 1;
 			}
@@ -305,11 +309,6 @@ Uint Uint::division_reste(Uint& diviseur) {
 			reste = reste - b;
 		}
 	}
-	/*
-	if(reste.nombre.empty()) {
-		reste.nombre.push_back(0);
-	}
-	 */
 	diviseur = reste;
 	return quotient;
 }
