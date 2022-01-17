@@ -22,13 +22,13 @@ Description    :		Classe qui permet de gérer des unsigned int de taille
 Uint::Uint() = default;
 
 Uint::operator Sint() const {
-	//Conversion Uint -> Sint
+	//Permet la conversion de Uint en Sint
 	Sint nombre_sint = 0;
 	std::string string_nombre;
 	for (size_t i = this->nombre.size(); i > 0; i--) {
 		string_nombre += std::to_string(this->nombre.at(i-1));
 	}
-	nombre_sint=string_nombre;
+	nombre_sint = string_nombre;
 	return nombre_sint;
 
 }
@@ -44,21 +44,21 @@ Uint::Uint(std::string nombre) {
 }
 
 Uint::Uint(uint64_t nombre) {
-	//Simple copie
+	//Simple copie puis constructeur par string
 	std::string nombre_string = std::to_string(nombre);
 	*this = Uint(nombre_string);
 }
 
 Uint::operator uint64_t() const {
-	uint64_t nombre = 0;
+	uint64_t nombre_uint64 = 0;
 	int multiplicateur = 1;
 	for (size_t i = 0; i < this->nombre.size(); i++) {
 		if(i){
 			multiplicateur *= 10;
 		}
-		nombre += size_t(this->nombre.at(i) * multiplicateur);
+		nombre_uint64 += size_t(this->nombre.at(i) * multiplicateur);
 	}
-	return nombre;
+	return nombre_uint64;
 }
 
 bool Uint::operator<(const Uint& rhs) const {
@@ -91,22 +91,28 @@ Uint& Uint::operator*=(const Uint& rhs) {
 	int report = 0;
 	for(size_t i = 0; i < this->nombre.size(); ++i) {
 		manipulations.nombre.clear();
-		//*10 en fonction de l'avancée du calcul
+		/**
+		 * *10 en fonction de l'avancée du calcul (en se basant sur les
+		 * multiplications en colonnes.)
+		 */
 		for(size_t k = 0; k < i; ++k) {
 			manipulations.nombre.push_back(0);
 		}
-		//Multiplication basique
+		//Multiplication basique de chaque cellule.
 		for(int j : rhs.nombre) {
 			manipulations.nombre.push_back(this->nombre.at(i) * j);
 		}
-		//Recalculer chaque cellule
+		/**
+		 * Recalculer chaque cellule puis préparer un report (vu dans les labos
+		 * sur Array).
+		 */
 		for(int& l : manipulations.nombre) {
 			int temp = l + report;
 			l = temp % 10;
 			report = temp / 10;
 		}
 
-		//Si il y a un dernier report
+		//Si il y a un dernier report à ajouter (100 * 100 != 0000 mais 10000...)
 		if(report) {
 			manipulations.nombre.push_back(report);
 		}
@@ -114,7 +120,6 @@ Uint& Uint::operator*=(const Uint& rhs) {
 		resultat = manipulations + resultat;
 		resultat.fit();
 	}
-
 	*this = resultat;
 	return *this;
 }
@@ -147,13 +152,15 @@ Uint& Uint::operator+=(const Uint& rhs) {
 			this->nombre.push_back(0);
 		}
 	}
+	//Calcul basique vu dans un labo précédent sur les Arrays
 	int report = 0;
-	for(size_t i = 0; i < this->nombre.size(); ++i) {
+	for (size_t i = 0; i < this->nombre.size(); ++i) {
 		int somme = this->nombre.at(i) + temp.nombre.at(i) + report;
 		this->nombre.at(i) = somme % 10;
 		report = somme / 10;
 	}
-	if(report) {
+	//Le dernier report pour avoir un vrai nombre (999 + 1 => 1000 et pas 000)
+	if (report) {
 		this->nombre.push_back(report);
 	}
 	return *this;
@@ -162,19 +169,26 @@ Uint& Uint::operator+=(const Uint& rhs) {
 Uint& Uint::operator-=(const Uint& rhs) {
 	Uint temp = rhs;
 	// Check si underflow.
-	if(*this < temp) {
+	if (*this < temp) {
 		std::cerr << "Underflow";
 		*this = 0;
 		return *this;
 	}
-	while(this->nombre.size() != temp.nombre.size()) {
+	//Mettre les vecteurs à la même taille pour éviter les overflow
+	while (this->nombre.size() != temp.nombre.size()) {
 		temp.nombre.push_back(0);
 	}
-	for(size_t i = 0; i < temp.nombre.size(); ++i) {
+	//temp ferra la même taille donc autant l'utiliser
+	for (size_t i = 0; i < temp.nombre.size(); ++i) {
+		//Cas facile.
 		if (this->nombre.at(i) >= temp.nombre.at(i)) {
 			this->nombre.at(i) = this->nombre.at(i) - temp.nombre.at(i);
-		} else if(i != this->nombre.size() - 1 && this->nombre.at(i) < temp.nombre.at(i)) {
-			this->nombre.at(i) = this->nombre.at(i) + 10 - temp.nombre.at(i);
+		} else if (i != this->nombre.size() - 1 &&
+		this->nombre.at(i) < temp.nombre.at(i)) {
+			//Si on dans l'unité la plus haute, on ne peut pas soustraire à i + 1
+
+			this->nombre.at(i) = this->nombre.at(i) + 10 -
+				temp.nombre.at(i);
 			this->nombre.at(i + 1) = this->nombre.at(i + 1) - 1;
 		}
 	}
@@ -282,9 +296,10 @@ void Uint::fit() {
 }
 
 Uint& Uint::division_par2() {
+	const int REPORT_DIV_2 = 5;
 	for(size_t i = 0; i < this->nombre.size(); ++i) {
 		if(i && this->nombre.at(i) % 2) {
-			this->nombre.at(i - 1) += 5;
+			this->nombre.at(i - 1) += REPORT_DIV_2;
 		}
 		this->nombre.at(i) /= 2;
 	}

@@ -19,18 +19,19 @@ Description    :		Cette classe est relativement similaire à Uint, mais elle
 Sint::Sint() = default;
 
 Sint::Sint(std::string nombre) {
-	//Verifier si premier caractère est '-'
+	//Vérifier si premier caractère est '-'
 	if(nombre.at(0) == 45) {
 		this->signe = false;
 		nombre.erase(nombre.begin());
 	} else {
 		this->signe = true;
 	}
+	//Appeler constructeur de Uint.
 	this->nombre = nombre;
 }
 
 Sint::Sint(int64_t nombre) {
-	//Simple copie
+	//Simple copie puis constructeur par string
 	std::string nombre_string = std::to_string(nombre);
 	*this = Sint(nombre_string);
 }
@@ -70,6 +71,7 @@ Sint& Sint::operator+=(const Sint& rhs) {
 	if (this->signe == rhs.signe) {
 		this->nombre += rhs.nombre;
 	} else {
+		//Vu que les signes sont différents, on peut appliquer les lois des maths.
 		if (this->nombre > rhs.nombre) {
 			this->nombre -= rhs.nombre;
 		} else {
@@ -104,6 +106,7 @@ Sint& Sint::operator-=(const Sint& rhs) {
 }
 
 Sint& Sint::operator*=(const Sint& rhs) {
+	//Vu que - = 0 et + = 1, donc 1 + 1 = 2 et 2 % 2 = 0 donc si on inverse...
 	this->signe = !((this->signe + rhs.signe) % 2);
 	this->nombre *= rhs.nombre;
 	this->retirer_signe_neutralite();
@@ -111,6 +114,7 @@ Sint& Sint::operator*=(const Sint& rhs) {
 }
 
 Sint& Sint::operator/=(const Sint& rhs) {
+	//Vu que - = 0 et + = 1, donc 1 + 1 = 2 et 2 % 2 = 0 donc si on inverse...
 	this->signe = !((this->signe + rhs.signe) % 2);
 	this->nombre /= rhs.nombre;
 	this->retirer_signe_neutralite();
@@ -171,6 +175,7 @@ int Sint::comp(const Sint& lhs, const Sint& rhs) const {
 		return 0;
 	}
 
+	//Gérer les cas -1
 	if (lhs.signe < rhs.signe) {
 		return -1;
 	}
@@ -184,7 +189,7 @@ int Sint::comp(const Sint& lhs, const Sint& rhs) const {
 			return -1;
 		}
 	}
-
+	//Sinon, on retourne 1 dans tout les cas
 	return 1;
 }
 

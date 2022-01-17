@@ -229,6 +229,9 @@ private:
 	Uint& division_par2();
 
 	/**
+	 * @brief Cet algorithme est donné durant le cours dans l'énoncé du
+	 * laboratoire 30. Il nous retourne le résultat d'une division ainsi que son
+	 * modulo.
 	 * @param Uint& diviseur : sert aussi pour l'opération %.
 	 * @return Uint : quotient
 	 */

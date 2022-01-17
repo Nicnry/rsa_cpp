@@ -11,6 +11,8 @@ Description    :		Ce laboratoire reprend le laboratoire 16 fait plus tôt dans
  							voir rsa.cpp). Pour plus d'informations sur les fonctions
  							dans ce laboratoire, voir le laboratoire 16 (
  							https://github.com/Nicnry/RSA_cpp_basique/blob/main/main.cpp).
+ 							La constante E sert à générer une partie de la clef publique
+ 							et a été demandée lors du cours.
 -----------------------------------------------------------------------------------
 */
 
@@ -28,7 +30,7 @@ using namespace std;
  * cryptographie. le nombre choisi pour la graine est aléatoire, d'autres
  * chiffres iraient aussi.
  */
-const uint32_t GRAINE = 34032;
+const uint32_t GRAINE = 19283;
 const Uint E = 17;
 mt19937 mt_rand(GRAINE);
 uniform_int_distribution<int32_t> distribution(0, 9);
@@ -47,7 +49,7 @@ uniform_int_distribution<int32_t> distribution(0, 9);
  * @param Uint base : b
  * @param Uint exposant : e
  * @param Uint& modulo : m
- * @return Uint resultat
+ * @return Uint : resultat
  */
 Uint mod_pow(Uint base, Uint exposant, const Uint& modulo);
 
@@ -173,9 +175,10 @@ bool test_rapide_primalite(const Uint& nombre) {
 	if (nombre < 2) {
 		return false;
 	}
+
 	/**
 	 * 2 est le premier nombre premier et empêche tous les nombres paires d'être
-	 * premier. Tester si l'utilisateur rentre 3 (car generateur_aleatoire
+	 * premier. Tester si l'utilisateur rentre 3 (car notre nombre aléatoire
 	 * retournera 2 et ça ferra modulo 2 donc boucle infinie plus tard dans la
 	 * fonction).
 	 */

@@ -1,10 +1,23 @@
 /*
 --------------------------------------------------------------------------------
-Nom du fichier :    	henry_labo31.cpp
+Nom du fichier :    	rsa.cpp
 Auteur(s)      :    	Nicolas Henry
-Date creation  :    	11.01.2022
+Date creation  :    	17.01.2022
 Laboratoire n° :    	31
-Description    :
+Description    :		Ce fichier est fourni par l'enseignant afin de tester
+ 							classe Uint. Dans le cadre du laboratoire 31, il nous
+ 							permet de crypter et décrypter un fichier text fournis en
+ 							paramètre lors de l'exécution du programme. Les clefs sont
+ 							générées par le fichier henry_labo31.cpp. Il faut lancer
+ 							le fichier henry_labo31.cpp, choisir une taille de clefs,
+ 							ajouter la paire pour crypter dans un fichier qui
+ 							contiendra les clefs et un retour de ligne à la fin du
+ 							fichier, mettre son message à coder dans un fichier
+ 							d'entrée puis lancer le programme en mode cryptage (-c).
+ 							Pour l'opération inverse, mettre les clefs de
+ 							décryptage dans le fichier de clefs (toujours avec un
+ 							retour à la ligne) puis lancer le programme en décryptage
+ 							(-d).
 --------------------------------------------------------------------------------
 */
 
@@ -36,10 +49,10 @@ public:
  * est le même résultat que (b^e mod m). Attention, le nom a changé dans ce
  * laboratoire car le fichier fournit pour les tests utilise la fonction
  * "mod_pow".
- * @param base
- * @param exposant
- * @param modulo
- * @return resultat
+ * @param Uint base : b
+ * @param Uint exposant : e
+ * @param Uint& modulo : m
+ * @return Uint resultat
  */
 Uint mod_pow(Uint base, Uint exposant, const Uint& modulo);
 
@@ -255,6 +268,7 @@ void decrypte(const string& nom_cle, const string& nom_in, const string& nom_out
 	fichier.close();
 
 }
+
 Uint mod_pow(Uint base, Uint exposant, const Uint& modulo) {
 	Uint resultat = 1;
 	while (exposant > 0) {
@@ -266,6 +280,5 @@ Uint mod_pow(Uint base, Uint exposant, const Uint& modulo) {
 			exposant--;
 		}
 	}
-
 	return resultat;
 }
