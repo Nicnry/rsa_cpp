@@ -25,8 +25,7 @@ Uint::operator Sint() const {
 	//Conversion Uint -> Sint
 	Sint nombre_sint = 0;
 	std::string string_nombre;
-	for (size_t i = this->nombre.size(); i > 0; i--)
-	{
+	for (size_t i = this->nombre.size(); i > 0; i--) {
 		string_nombre += std::to_string(this->nombre.at(i-1));
 	}
 	nombre_sint=string_nombre;
@@ -34,9 +33,6 @@ Uint::operator Sint() const {
 
 }
 
-/**
- * @param std::string nombre : valeur de notre Uint
- */
 Uint::Uint(std::string nombre) {
 	//Inverser le nombre afin de faire des push_back et ne pas devoir tout re-trier.
 	for(size_t i = nombre.length() + 1; i > 0; --i) {
@@ -47,22 +43,12 @@ Uint::Uint(std::string nombre) {
 	this->fit();
 }
 
-/**
- *
- * @brief Ce constructeur va appeler le constructeur par string
- * @param uint64_t nombre : valeur de notre Uint
- */
 Uint::Uint(uint64_t nombre) {
 	//Simple copie
 	std::string nombre_string = std::to_string(nombre);
 	*this = Uint(nombre_string);
 }
 
-/**
- *
- * @brief Convertit un Uint en uint64_t
- * @return uint64_t : nombre
- */
 Uint::operator uint64_t() const {
 	uint64_t nombre = 0;
 	int multiplicateur = 1;
@@ -70,63 +56,35 @@ Uint::operator uint64_t() const {
 		if(i){
 			multiplicateur *= 10;
 		}
-		nombre += this->nombre.at(i) * multiplicateur;
+		nombre += size_t(this->nombre.at(i) * multiplicateur);
 	}
 	return nombre;
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return bool
- */
 bool Uint::operator<(const Uint& rhs) const {
 	return comp(*this, rhs) == -1;
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return bool
- */
 bool Uint::operator>(const Uint& rhs) const {
 	return comp(*this, rhs) == 1;
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return bool
- */
 bool Uint::operator<=(const Uint& rhs) const {
 	return (comp(*this, rhs) == -1 || comp(*this, rhs) == 0) ;
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return bool
- */
 bool Uint::operator>=(const Uint& rhs) const {
 	return (comp(*this, rhs) == 1 || comp(*this, rhs) == 0);
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return bool
- */
 bool Uint::operator==(const Uint& rhs) const {
 	return comp(*this, rhs) == 0;
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return bool
- */
 bool Uint::operator!=(const Uint& rhs) const {
 	return comp(*this, rhs) != 0;
 }
 
-/**
- * @param Uint rhs : Valeur de droite
- * @return Uint& : *this
- */
 Uint& Uint::operator*=(const Uint& rhs) {
 	Uint resultat = 0;
 	Uint manipulations;
@@ -161,20 +119,12 @@ Uint& Uint::operator*=(const Uint& rhs) {
 	return *this;
 }
 
-/**
- * @param Uint& rhs : Valeur de droite
- * @return Uint& : *this
- */
 Uint& Uint::operator/=(const Uint& rhs) {
 	Uint temp = rhs;
 	*this = this->division_reste(temp);
 	return *this;
 }
 
-/**
- * @param Uint& rhs : Valeur de droite
- * @return Uint& : *this
- */
 Uint& Uint::operator%=(const Uint& rhs) {
 	Uint temp = rhs;
 	this->division_reste(temp);
@@ -182,10 +132,6 @@ Uint& Uint::operator%=(const Uint& rhs) {
 	return *this;
 }
 
-/**
- * @param Uint& rhs : Valeur de droite
- * @return Uint& : *this
- */
 Uint& Uint::operator+=(const Uint& rhs) {
 	Uint temp = rhs;
 	//Définir le plus petit pour éviter les overflows
@@ -213,13 +159,9 @@ Uint& Uint::operator+=(const Uint& rhs) {
 	return *this;
 }
 
-/**
- * @param Uint& rhs : Valeur de droite
- * @return Uint& : *this
- */
 Uint& Uint::operator-=(const Uint& rhs) {
 	Uint temp = rhs;
-	// Check for underflow.
+	// Check si underflow.
 	if(*this < temp) {
 		std::cerr << "Underflow";
 		*this = 0;
@@ -229,7 +171,6 @@ Uint& Uint::operator-=(const Uint& rhs) {
 		temp.nombre.push_back(0);
 	}
 	for(size_t i = 0; i < temp.nombre.size(); ++i) {
-		//
 		if (this->nombre.at(i) >= temp.nombre.at(i)) {
 			this->nombre.at(i) = this->nombre.at(i) - temp.nombre.at(i);
 		} else if(i != this->nombre.size() - 1 && this->nombre.at(i) < temp.nombre.at(i)) {
@@ -241,58 +182,31 @@ Uint& Uint::operator-=(const Uint& rhs) {
 	return *this;
 }
 
-/**
- * @param size_t& rhs : Valeur de droite
- * @return Uint& : *this
- */
 Uint& Uint::operator-=(const size_t& rhs) {
 	Uint temp = rhs;
 	return *this -= temp;
 }
 
-/**
- * @brief opérateur ++ pré-fixé (exemple : ++i) qui appelle l'opérateur +=
- * @return Uint& : *this
- */
 Uint& Uint::operator++() {
 	return *this += 1;
 }
 
-/**
- * @brief opérateur ++ post-fixé (exemple : i++) qui appelle l'opérateur
- * pré-fixé (++i).
- * @return Uint : temp
- */
 const Uint Uint::operator++(int) {
 	Uint temp = *this;
 	++*this;
 	return temp;
 }
 
-/**
- * @brief opérateur -- pré-fixé (exemple : --i) qui appelle l'opérateur -=
- * @return Uint& : *this
- */
 Uint& Uint::operator--() {
 	return *this -= 1;
 }
 
-/**
- * @brief opérateur -- post-fixé (exemple : i--) qui appelle l'opérateur
- * pré-fixé (--i).
- * @return Uint : temp
- */
 const Uint Uint::operator--(int) {
 	Uint temp = *this;
 	--*this;
 	return temp;
 }
 
-/**
- * @param ostream& lhs : Valeur de gauche
- * @param Uint& rhs : Valeur de droite
- * @return ostream& : lhs
- */
 std::ostream& operator<<(std::ostream& lhs, const Uint& rhs) {
 	for (size_t i = rhs.nombre.size(); i > 0; --i) {
 		lhs << rhs.nombre.at(i - 1);
@@ -300,100 +214,46 @@ std::ostream& operator<<(std::ostream& lhs, const Uint& rhs) {
 	return lhs;
 }
 
-/**
- * @param istream& lhs : ?
- * @param Uint& premierNombre : ?
- * @return istream& : lhs
- */
-std::istream& operator>>(std::istream& is, Uint& premierNombre) {
+std::istream& operator>>(std::istream& is, Uint& rhs) {
 	std::string temp;
 	if (is >> temp) {
-		premierNombre = temp;
+		rhs = temp;
 	} else {
 		is.clear(std::ios::badbit | is.rdstate());
 	}
 	return is;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur +=
- * @param Uint lhs : Valeur de gauche
- * @param Uint& rhs : Valeur de droite
- * @return Uint : lhs
- */
 Uint operator+(Uint lhs, const Uint& rhs) {
 	return lhs += rhs;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur -=
- * @param Uint lhs : Valeur de gauche
- * @param Uint& rhs : Valeur de droite
- * @return Uint : lhs
- */
 Uint operator-(Uint lhs, const Uint& rhs) {
 	return lhs -= rhs;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur -=
- * @param Uint lhs : Valeur de gauche
- * @param size_t& rhs : Valeur de droite
- * @return Uint : lhs
- */
 Uint operator-(Uint lhs, const size_t& rhs) {
 	Uint temp = rhs;
 	return lhs -= temp;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur *=
- * @param Uint lhs : Valeur de gauche
- * @param size_t& rhs : Valeur de droite
- * @return Uint : lhs
- */
 Uint operator*(Uint lhs, const size_t& rhs) {
 	return lhs *= rhs;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur *=
- * @param Uint lhs : Valeur de gauche
- * @param Uint& rhs : Valeur de droite
- * @return Uint& : lhs
- */
 Uint& operator*(Uint lhs, const Uint& rhs) {
 	const Uint& temp = rhs;
 	return lhs *= temp;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur /=
- * @param Uint lhs : Valeur de gauche
- * @param Uint& rhs : Valeur de droite
- * @return Uint : lhs
- */
 Uint operator/(Uint lhs, const Uint& rhs) {
 	return lhs /= rhs;
 }
 
-/**
- * @brief Appel de la surcharge de l'opérateur %=
- * @param Uint lhs : Valeur de gauche
- * @param Uint& rhs : Valeur de droite
- * @return Uint : lhs
- */
 Uint operator%(Uint lhs, const Uint& rhs) {
 	return lhs %= rhs;
 }
 
-/**
- * @brief Fonction qui va comparer 2 vecteurs et retourner 0 si ils sont égaux
- * -1 si a est plus petit que b et 1 sinon.
- * @param Uint& a : Valeur de gauche
- * @param Uint& b : Valeur de droite
- * @return int : constante
- */
 int Uint::comp(const Uint& a, const Uint& b) const {
 	if(a.nombre == b.nombre) {
 		return 0;
@@ -416,21 +276,12 @@ int Uint::comp(const Uint& a, const Uint& b) const {
 	return 1;
 }
 
-/**
- * @brief Lors des opérations sur notre vecteur, il peut arriver qu'il contient
- * des 0 dans les dernières positions (par exemple si je soustrait 10 à 100 le
- * resultat serait 090).
- * @return void
- */
 void Uint::fit() {
 	while (!this->nombre.back() && this->nombre.size() > 1) {
 		this->nombre.pop_back();
 	}
 }
 
-/**
- * @return Uint& : *this
- */
 Uint& Uint::division_par2() {
 	for(size_t i = 0; i < this->nombre.size(); ++i) {
 		if(i && this->nombre.at(i) % 2) {
@@ -442,10 +293,6 @@ Uint& Uint::division_par2() {
 	return *this;
 }
 
-/**
- * @param Uint& diviseur : sert aussi pour l'opération %.
- * @return Uint : quotient
- */
 Uint Uint::division_reste(Uint& diviseur) {
 	Uint p2 = 1;
 	Uint b = diviseur;

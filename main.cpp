@@ -10,7 +10,7 @@ const uint32_t GRAINE = 34032;
 mt19937 mt_rand(GRAINE);
 uniform_int_distribution<int32_t> distribution(0, 9);
 
-const Uint E = 65537;
+const Uint E = 17;
 
 
 /**
@@ -66,44 +66,40 @@ Uint euclide_etendue(Sint nombre1, Sint nombre2, Sint& inverse);
  * @param inverse : retourne l'inverse par référence
  * @return PGDC de 2 nombres.
  */
-Uint generateur_aleatoire(int nombre);
+Uint generateur_aleatoire(size_t nombre);
 
 int main() {
-	Sint inverse = 0; //L'inverse peut être négatif durant le calcul
-	// Stockage du calcul (p-1)*(q-1) pour éviter de le réécrire plusieurs fois.
+	Sint inverse = 0;
 	bool e_correct;
-	Uint n, clef_prive, verification_e, p, q;     // Stock la clef privé
-	int taille_clef;
-	cout << "Introduire la taille des clef privée à générer: ";
+	Uint n, clef_prive, verification_e, p, q;
+	size_t taille_clef;
+	cout << "Veuillez entrer la taille de vos clefs: ";
 	cin >> taille_clef;
-	cout << "1" << endl;
 	do {
-		p = generateur_aleatoire(taille_clef); // Génération d'un nombre random
-	} while (!test_rapide_primalite(p)); // Vérifie que P est prime
-	cout << "2" << endl;
+		p = generateur_aleatoire(taille_clef);
+	} while (!test_rapide_primalite(p)); //p doit être premier
 	do {
-		q = generateur_aleatoire(taille_clef); // Vérification generateur_aleatoire
-	} while (!test_rapide_primalite(q)); // Vérification exponentiation modulaire, prime
-	cout << "3" << endl;
-	n = p * q;
-	verification_e = (p - 1) * (q - 1);
+		q = generateur_aleatoire(taille_clef);
+	} while (!test_rapide_primalite(q)); //q doit être premier
 
-	e_correct = euclide_etendue((Sint)verification_e, (Sint)E,inverse) == 1 && E < verification_e;
+	verification_e = (p - 1) * (q - 1);
+	e_correct = euclide_etendue((Sint)verification_e, (Sint)E, inverse) == 1 && E < verification_e;
 	if(!e_correct){
 		cout << "Erreur avec e " << endl;
 	}
 	clef_prive = (Uint)inverse;
-	cout << "Pair de clef pour crypter : " << n << " " << E << endl;
-	cout << "Pair de clef pour decrypter : " << n << " " << clef_prive<<endl;
 
+	n = p * q;
+	cout << "Pair de clef pour crypter : " << n << " " << E << endl;
+	cout << "Pair de clef pour decrypter : " << n << " " << clef_prive <<endl;
 }
-Uint generateur_aleatoire(int nombre) {
+
+Uint generateur_aleatoire(size_t nombre) {
 	string random_string;
 	Uint random_sint;
 	int random_digit;
 	for (size_t i = 0; i < nombre; i++) {
 		random_digit = distribution(mt_rand);
-		cout << "random : " << random_digit << endl;
 		//On supprime
 		if (i == 0) {
 			do {
@@ -198,11 +194,9 @@ Uint euclide_etendue(Sint nombre1, Sint nombre2, Sint& inverse) {
 		pgdc_prime = pgdc_temp - q * pgdc_prime;
 		inverse_prime = inverse_temp - q * inverse_prime;
 	}
-	// /!\ inverse peut être négatif, c'est pourquoi les int sont utilisé dans cette fonction et non des unsigned.
-	// if (inverse < 0)
-	// {
-	//     inverse = inverse + nombre1;
-	//     cout << "kekw" << endl;
-	// }
+
+	if (inverse < 0) {
+	     inverse = inverse + nombre1;
+	}
 	return (Uint)pgdc;
 }

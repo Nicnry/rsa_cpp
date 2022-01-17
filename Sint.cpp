@@ -18,11 +18,6 @@ Description    :		Cette classe est relativement similaire à Uint, mais elle
 
 Sint::Sint() = default;
 
-/**
- * @brief On vérifie si le premier caractère est le signe '-' afin de définir
- * notre attribut signe (0 = -) (1 = +)
- * @param std::string nombre : valeur de notre Sint
- */
 Sint::Sint(std::string nombre) {
 	//Verifier si premier caractère est '-'
 	if(nombre.at(0) == 45) {
@@ -48,7 +43,7 @@ Sint::Sint(int64_t nombre) {
 
 
 Sint::operator Uint() const {
-	Uint nombre_uint = 0;
+	Uint nombre_uint;
 	nombre_uint = this->nombre;
 	return nombre_uint;
 }
@@ -82,7 +77,7 @@ Sint& Sint::operator+=(const Sint& rhs) {
 		this->nombre += rhs.nombre;
 	} else {
 		if (this->nombre > rhs.nombre) {
-			this->nombre = this->nombre - rhs.nombre;
+			this->nombre -= rhs.nombre;
 		} else {
 			this->nombre = rhs.nombre - this->nombre;
 			//On inverse seulement le signe quand le deuxième nombre est plus grand
@@ -90,25 +85,27 @@ Sint& Sint::operator+=(const Sint& rhs) {
 		}
 	}
 	this->retirer_signe_neutralite();
-
 	return *this;
 }
 
 Sint& Sint::operator-=(const Sint& rhs) {
+	/*
+	1. Exemple 2 - 4
+	2. Exemple 6 - 3
+	3. Exemple -6 - 4
+	 */
 	if (this->signe == rhs.signe) {
 		if (this->nombre > rhs.nombre) {
-			this->nombre = this->nombre - rhs.nombre;
+			this->nombre -= rhs.nombre; //2. 6 - 3 = 3
 		} else {
-			this->nombre = rhs.nombre - this->nombre;
-			//On inverse seulement le signe quand le deuxième nombre est plus grand
-			this->signe = !this->signe;
+			this->nombre = rhs.nombre - this->nombre; //1. 4 - 2 = 2
+			this->signe = !this->signe; //-2
 		}
-
 	} else {
+		//3. 6 + 4 = 10 Mais, le signe de 6 est - donc -10
 		this->nombre += rhs.nombre;
 	}
 	this->retirer_signe_neutralite();
-
 	return *this;
 }
 
@@ -127,6 +124,7 @@ Sint& Sint::operator/=(const Sint& rhs) {
 }
 
 Sint& Sint::operator%=(const Sint& rhs) {
+	//Pas besoin de gérer le signe, il va dépendre de *this
 	this->nombre %= rhs.nombre;
 	this->retirer_signe_neutralite();
 	return *this;
@@ -155,14 +153,14 @@ std::ostream& operator<<(std::ostream& lhs, const Sint& rhs) {
 }
 
 Sint operator+(Sint lhs, const Sint& rhs) {
-	return lhs += rhs; //Appel à +=
+	return lhs += rhs;
 }
 
 Sint operator-(Sint lhs, const Sint& rhs) {
-	return lhs -= rhs; //Appel à -=
+	return lhs -= rhs;
 }
 
-Sint& operator*(Sint lhs, const Sint& rhs) {
+Sint& operator*(Sint& lhs, const Sint& rhs) {
 	return lhs *= rhs;
 }
 
@@ -171,8 +169,7 @@ Sint operator/(Sint lhs, const Sint& rhs) {
 }
 
 Sint operator%(Sint lhs, const Sint& rhs) {
-	lhs %= rhs;
-	return lhs;
+	return lhs %= rhs;
 }
 
 int Sint::comp(const Sint& lhs, const Sint& rhs) const {
