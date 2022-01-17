@@ -153,7 +153,7 @@ private:
 	 * @param Sint& rhs : Valeur de droite
 	 * @return Sint : lhs
 	 */
-	friend Sint& operator*(Sint& lhs, const Sint& rhs);
+	friend Sint operator*(Sint lhs, const Sint& rhs);
 
 	/**
 	 * @brief Appel de la surcharge de l'opérateur /=.

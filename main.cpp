@@ -28,7 +28,7 @@ using namespace std;
  * cryptographie. le nombre choisi pour la graine est aléatoire, d'autres
  * chiffres iraient aussi.
  */
-const uint32_t GRAINE = 27387;
+const uint32_t GRAINE = 34032;
 const Uint E = 17;
 mt19937 mt_rand(GRAINE);
 uniform_int_distribution<int32_t> distribution(0, 9);
@@ -246,17 +246,21 @@ Uint euclide_etendue(const Sint& nombre1, Sint nombre2, Sint& inverse) {
 }
 
 Uint generateur_aleatoire(size_t nombre) {
-	string nombre_alea_txt; //Créer un string car pas de setter de l'attribut nombre.
-	int nombre_unique_alea;
+	//Créer une string car pas de setter dans notre classe.
+	string nombre_aleatoire_text;
+	int valeur_aleatoire;
 	for (size_t i = 0; i < nombre; i++) {
-		nombre_unique_alea = distribution(mt_rand);
-		//Gérer le cas si le nombre commence par un 0
-		if (!nombre_unique_alea && !i) {
+		valeur_aleatoire = distribution(mt_rand);
+		/**
+		 * Si le premier nombre est 0, re-générer pour ne pas avoir de nombre
+		 * comme suit : 012 -> 12 donc 2 chiffres au lieu de 3.
+		 */
+		if (!i) {
 			do {
-				nombre_unique_alea = distribution(mt_rand);
-			} while (!nombre_unique_alea);
+				valeur_aleatoire = distribution(mt_rand);
+			} while (!valeur_aleatoire);
 		}
-		nombre_alea_txt += to_string(nombre_unique_alea);
+		nombre_aleatoire_text += to_string(valeur_aleatoire);
 	}
-	return Uint(nombre_alea_txt);
+	return Uint(nombre_aleatoire_text);
 }

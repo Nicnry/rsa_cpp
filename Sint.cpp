@@ -154,7 +154,7 @@ Sint operator-(Sint lhs, const Sint& rhs) {
 	return lhs -= rhs;
 }
 
-Sint& operator*(Sint& lhs, const Sint& rhs) {
+Sint operator*(Sint lhs, const Sint& rhs) {
 	return lhs *= rhs;
 }
 
